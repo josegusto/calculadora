@@ -37,56 +37,12 @@
             background-color: #1a202c;
             border: 1px dashed #4a5568;
         }
-        .fuel-tank-visualization {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 5px;
-            height: 100px;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: #4a5568;
-            margin-top: 1rem;
-        }
-        .tank {
-            background-color: #3b82f6;
-            width: 30%;
-            border-radius: 4px 4px 0 0;
-            position: relative;
-            transition: height 0.5s ease-in-out;
-            cursor: pointer;
-        }
-        .tank-label {
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.75rem;
-            color: #a0aec0;
-        }
-        .tank.center {
-            width: 35%;
-            background-color: #6366f1;
-        }
         #modal {
             transition: opacity 0.3s ease;
         }
-        .click-tooltip {
-            position: absolute;
-            background-color: #111827;
-            color: #e5e7eb;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            z-index: 50;
-            pointer-events: none;
-            border: 1px solid #374151;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            transform: translateX(-50%);
-            white-space: nowrap;
-            opacity: 1;
-            transition: opacity 0.3s ease-out;
+        /* Custom transition for the visualization bar height */
+        .tank-visualization-bar {
+            transition: height 0.5s ease-in-out;
         }
     </style>
 </head>
@@ -94,7 +50,7 @@
 
     <div class="w-full max-w-md mx-auto">
         <header class="text-center mb-6">
-            <img src="https://i.imgur.com/ApK41Jx.png" alt="GOL Logo" class="mx-auto h-20 w-auto mb-4">
+            <img src="https://i.imgur.com/ApK41Jx.png" alt="GOL Logo" class="mx-auto h-20 w-auto mb-4" onerror="this.style.display='none'">
             <h1 class="text-2xl font-bold text-white">Calculadora de Combust&iacute;vel</h1>
             <p class="text-sm text-gray-400">Para Boeing 737 NG & MAX</p>
         </header>
@@ -119,29 +75,46 @@
             </button>
 
             <div id="results" class="mt-6 hidden">
-                <h3 class="text-lg font-semibold text-center mb-2">Distribui&ccedil;&atilde;o nos Tanques</h3>
-                <div class="grid grid-cols-3 gap-2 text-center">
+                <h3 class="text-lg font-semibold text-center mb-4">N&iacute;vel dos Tanques</h3>
+                
+                <!-- New Vertical Bar Visualization -->
+                <div class="w-full flex justify-around items-end h-32 p-4 bg-gray-900/50 rounded-lg my-2 border border-gray-700">
+                    <!-- Tank 1 -->
+                    <div class="w-1/4 h-full flex flex-col justify-end">
+                        <div id="visTank1" class="tank-visualization-bar bg-blue-500 rounded-t-md flex items-center justify-center text-white font-bold text-xs" style="height: 0%;">
+                            <span id="visTank1Percent"></span>
+                        </div>
+                        <p class="text-center text-xs mt-1 text-gray-300">Asa 1</p>
+                    </div>
+                    <!-- Center Tank -->
+                    <div class="w-1/3 h-full flex flex-col justify-end">
+                        <div id="visTankCenter" class="tank-visualization-bar bg-indigo-500 rounded-t-md flex items-center justify-center text-white font-bold text-xs" style="height: 0%;">
+                            <span id="visTankCenterPercent"></span>
+                        </div>
+                        <p class="text-center text-xs mt-1 text-gray-300">Central</p>
+                    </div>
+                    <!-- Tank 2 -->
+                    <div class="w-1/4 h-full flex flex-col justify-end">
+                        <div id="visTank2" class="tank-visualization-bar bg-blue-500 rounded-t-md flex items-center justify-center text-white font-bold text-xs" style="height: 0%;">
+                            <span id="visTank2Percent"></span>
+                        </div>
+                        <p class="text-center text-xs mt-1 text-gray-300">Asa 2</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-center mt-3">
                     <div class="result-box p-3 rounded-md">
                         <p class="text-sm text-gray-400">Tanque 1 (Asa)</p>
                         <p id="resultTank1" class="text-xl font-bold"></p>
-                        <p id="resultTank1Percent" class="text-xs text-gray-300"></p>
                     </div>
                     <div class="result-box p-3 rounded-md">
                         <p class="text-sm text-gray-400">Central</p>
                         <p id="resultCentral" class="text-xl font-bold"></p>
-                        <p id="resultCentralPercent" class="text-xs text-gray-300"></p>
                     </div>
                     <div class="result-box p-3 rounded-md">
                         <p class="text-sm text-gray-400">Tanque 2 (Asa)</p>
                         <p id="resultTank2" class="text-xl font-bold"></p>
-                        <p id="resultTank2Percent" class="text-xs text-gray-300"></p>
                     </div>
-                </div>
-
-                <div class="fuel-tank-visualization">
-                    <div id="visTank1" class="tank"><span class="tank-label">Asa 1</span></div>
-                    <div id="visTankCenter" class="tank center"><span class="tank-label">Central</span></div>
-                    <div id="visTank2" class="tank"><span class="tank-label">Asa 2</span></div>
                 </div>
 
                 <div class="mt-4 text-center result-box p-3 rounded-md">
@@ -170,6 +143,7 @@
         </footer>
     </div>
 
+    <!-- Modal for Error Messages -->
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden" onclick="closeModal()">
         <div class="bg-red-800 border border-red-600 rounded-lg p-6 max-w-sm mx-auto text-center" onclick="event.stopPropagation()">
             <h3 class="text-lg font-bold text-white mb-2">Erro no C&aacute;lculo</h3>
@@ -181,41 +155,55 @@
     </div>
 
     <script>
+        // Aircraft configurations with maximum fuel capacity and wing tank capacity in KG.
         const AIRCRAFT_CONFIG = {
             "NG": {
-                maxCapacity: 20896,
-                wingTankCapacity: 3860,
+                maxCapacity: 20896, // Total capacity for 737-800 NG
+                wingTankCapacity: 3860, // Capacity of a single wing tank
             },
             "MAX": {
-                maxCapacity: 20728,
-                wingTankCapacity: 3814,
+                maxCapacity: 20728, // Total capacity for 737-8 MAX
+                wingTankCapacity: 3814, // Capacity of a single wing tank
             }
         };
+        // Standard fuel density (kg/L) for converting mass to volume.
         const FUEL_DENSITY = 0.80;
 
+        // DOM element references
         const aircraftTypeSelect = document.getElementById('aircraftType');
         const fuelInput = document.getElementById('fuelInput');
         const resultsDiv = document.getElementById('results');
         const modal = document.getElementById('modal');
         const modalMessage = document.getElementById('modal-message');
 
+        /**
+         * Displays a modal with a custom error message.
+         * @param {string} message - The error message to display.
+         */
         function showModal(message) {
             modalMessage.innerHTML = message;
             modal.classList.remove('hidden');
             modal.classList.add('opacity-100');
         }
 
+        /**
+         * Hides the error modal.
+         */
         function closeModal() {
             modal.classList.add('hidden');
             modal.classList.remove('opacity-100');
         }
 
+        /**
+         * Initiates the fuel calculation process.
+         * It reads user input, validates it, and calls the distribution function.
+         */
         function calculateFuel() {
             const aircraft = aircraftTypeSelect.value;
             const config = AIRCRAFT_CONFIG[aircraft];
             
             let totalFuel = parseFloat(fuelInput.value);
-            if (isNaN(totalFuel) || totalFuel <= 0) {
+            if (isNaN(totalFuel) || totalFuel < 0) { // Allow 0 for empty tanks calculation
                 showModal('Por favor, insira um valor de combust&iacute;vel total v&aacute;lido.');
                 return;
             }
@@ -228,6 +216,12 @@
             distributeFuel(totalFuel, config);
         }
 
+        /**
+         * Calculates the distribution of fuel across the tanks based on standard procedure.
+         * The wing tanks are filled first, up to their capacity. Any remaining fuel goes into the central tank.
+         * @param {number} totalFuel - The total amount of fuel in KG.
+         * @param {object} config - The configuration object for the selected aircraft.
+         */
         function distributeFuel(totalFuel, config) {
             let centralFuel = 0;
             let tank1Fuel = 0;
@@ -235,10 +229,12 @@
             const wingTanksTotalCapacity = config.wingTankCapacity * 2;
 
             if (totalFuel <= wingTanksTotalCapacity) {
+                // If total fuel fits within the wing tanks, split it evenly.
                 tank1Fuel = totalFuel / 2;
                 tank2Fuel = totalFuel / 2;
                 centralFuel = 0;
             } else {
+                // If total fuel exceeds wing tank capacity, fill wings completely and put the rest in the center.
                 tank1Fuel = config.wingTankCapacity;
                 tank2Fuel = config.wingTankCapacity;
                 centralFuel = totalFuel - wingTanksTotalCapacity;
@@ -247,85 +243,70 @@
             updateUI(totalFuel, centralFuel, tank1Fuel, tank2Fuel, config);
         }
         
+        /**
+         * Formats a number with thousand separators for the pt-BR locale.
+         * @param {number} num - The number to format.
+         * @returns {string} The formatted number string.
+         */
         function formatNumber(num) {
             return Math.round(num).toLocaleString('pt-BR');
         }
 
+        /**
+         * Updates the user interface with the calculated fuel distribution.
+         * @param {number} totalFuel - Total fuel in KG.
+         * @param {number} central - Fuel in the central tank in KG.
+         * @param {number} tank1 - Fuel in wing tank 1 in KG.
+         * @param {number} tank2 - Fuel in wing tank 2 in KG.
+         * @param {object} config - The configuration object for the selected aircraft.
+         */
         function updateUI(totalFuel, central, tank1, tank2, config) {
+            // Update the text displays for fuel amounts in KG and Liters.
             document.getElementById('resultCentral').textContent = `${formatNumber(central)} KG`;
             document.getElementById('resultTank1').textContent = `${formatNumber(tank1)} KG`;
             document.getElementById('resultTank2').textContent = `${formatNumber(tank2)} KG`;
             document.getElementById('totalLitros').textContent = `${formatNumber(totalFuel / FUEL_DENSITY)} L`;
 
-            const tank1PercentOfTotal = totalFuel > 0 ? (tank1 / totalFuel) * 100 : 0;
-            const centralPercentOfTotal = totalFuel > 0 ? (central / totalFuel) * 100 : 0;
-            const tank2PercentOfTotal = totalFuel > 0 ? (tank2 / totalFuel) * 100 : 0;
-
-            document.getElementById('resultTank1Percent').textContent = `(${tank1PercentOfTotal.toFixed(1).replace('.', ',')}%)`;
-            document.getElementById('resultCentralPercent').textContent = `(${centralPercentOfTotal.toFixed(1).replace('.', ',')}%)`;
-            document.getElementById('resultTank2Percent').textContent = `(${tank2PercentOfTotal.toFixed(1).replace('.', ',')}%)`;
-
-            const visTank1 = document.getElementById('visTank1');
-            const visTankCenter = document.getElementById('visTankCenter');
-            const visTank2 = document.getElementById('visTank2');
-
-            const tank1FillPercentage = (tank1 / config.wingTankCapacity) * 100;
-            const tank2FillPercentage = (tank2 / config.wingTankCapacity) * 100;
+            // --- Visualization Logic Change ---
+            // Calculate fill percentage based on INDIVIDUAL tank capacity.
+            const tank1FillPercentage = config.wingTankCapacity > 0 ? (tank1 / config.wingTankCapacity) * 100 : 0;
+            const tank2FillPercentage = config.wingTankCapacity > 0 ? (tank2 / config.wingTankCapacity) * 100 : 0;
             const centerCapacity = config.maxCapacity - (config.wingTankCapacity * 2);
             const centerFillPercentage = centerCapacity > 0 ? (central / centerCapacity) * 100 : 0;
 
+            // Get references to the visualization bars and their percentage text elements.
+            const visTank1 = document.getElementById('visTank1');
+            const visTankCenter = document.getElementById('visTankCenter');
+            const visTank2 = document.getElementById('visTank2');
+            const visTank1Percent = document.getElementById('visTank1Percent');
+            const visTankCenterPercent = document.getElementById('visTankCenterPercent');
+            const visTank2Percent = document.getElementById('visTank2Percent');
+
+            // Update the HEIGHT of the visualization bars.
             visTank1.style.height = `${tank1FillPercentage}%`;
             visTankCenter.style.height = `${centerFillPercentage}%`;
             visTank2.style.height = `${tank2FillPercentage}%`;
             
-            visTank1.title = `${tank1FillPercentage.toFixed(1).replace('.', ',')}%`;
-            visTankCenter.title = `${centerFillPercentage.toFixed(1).replace('.', ',')}%`;
-            visTank2.title = `${tank2FillPercentage.toFixed(1).replace('.', ',')}%`;
+            // Update the text inside the bars.
+            visTank1Percent.textContent = `${tank1FillPercentage.toFixed(1).replace('.', ',')}%`;
+            visTankCenterPercent.textContent = `${centerFillPercentage.toFixed(1).replace('.', ',')}%`;
+            visTank2Percent.textContent = `${tank2FillPercentage.toFixed(1).replace('.', ',')}%`;
+
+            // Hide text if bar is too small to prevent clutter.
+            visTank1Percent.classList.toggle('hidden', tank1FillPercentage < 15);
+            visTankCenterPercent.classList.toggle('hidden', centerFillPercentage < 15);
+            visTank2Percent.classList.toggle('hidden', tank2FillPercentage < 15);
             
+            // Make the results section visible.
             resultsDiv.classList.remove('hidden');
         }
 
+        // Add a keyboard listener to close the modal with the 'Escape' key.
         window.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 closeModal();
             }
         });
-
-        const visTank1 = document.getElementById('visTank1');
-        const visTankCenter = document.getElementById('visTankCenter');
-        const visTank2 = document.getElementById('visTank2');
-
-        function showClickTooltip(element) {
-            const text = element.title;
-            if (!text) return;
-
-            const existingTooltip = document.querySelector('.click-tooltip');
-            if (existingTooltip) {
-                existingTooltip.remove();
-            }
-
-            const tooltip = document.createElement('div');
-            tooltip.className = 'click-tooltip';
-            tooltip.textContent = text;
-            document.body.appendChild(tooltip);
-
-            const rect = element.getBoundingClientRect();
-            tooltip.style.left = `${rect.left + rect.width / 2}px`;
-            tooltip.style.top = `${rect.top + 10}px`;
-            tooltip.style.transform = 'translateX(-50%)';
-
-            setTimeout(() => {
-                tooltip.style.opacity = '0';
-                setTimeout(() => {
-                    if (tooltip) tooltip.remove();
-                }, 300);
-            }, 2000);
-        }
-
-        visTank1.addEventListener('click', () => showClickTooltip(visTank1));
-        visTankCenter.addEventListener('click', () => showClickTooltip(visTankCenter));
-        visTank2.addEventListener('click', () => showClickTooltip(visTank2));
     </script>
 </body>
 </html>
-
